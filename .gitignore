@@ -3,3 +3,8 @@
 
 # Ignore config  file
 config.ini
+
+# Ignore data
+/data/*.csv
+/data/*.db
+/data/*.parquet
