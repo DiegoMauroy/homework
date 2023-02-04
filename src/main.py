@@ -23,4 +23,4 @@ if __name__ == "__main__":
     
     if user_identified == True: # not a necessary condition, but just to be sure
 
-        resample(creation_df_final, url_base, url_query, url, w=0, h=0, m=1)
+        resample(creation_df_final, url_base, url_query, url, w=0, h=0, m=10)

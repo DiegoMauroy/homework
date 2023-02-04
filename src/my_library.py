@@ -115,7 +115,7 @@ def creation_df_final(url_base, url_query1, url_query2):
         df_currency_code = select_in_boolean_column(df_currency_code, "altcoin", False)
 
         # save dataset
-        df_currency_code.to_csv("data/df_currency_code.csv")
+        df_currency_code.to_parquet("data/df_currency_code.gzip", compression='gzip')
     
     # call api and recover data "ticker-all-currencies"
     time_api_call = timestamp()
@@ -136,7 +136,7 @@ def creation_df_final(url_base, url_query1, url_query2):
         df_price["timestamp"] = time_api_call
 
         # save dataset
-        df_price.to_csv("data/df_price.csv")
+        df_price.to_parquet("data/df_price.gzip", compression='gzip')
     
     # check connection api
     if status_price != 200 or status_currencies_code != 200:
@@ -165,4 +165,4 @@ def creation_df_final(url_base, url_query1, url_query2):
         df_final.set_index("timestamp", inplace = True)
 
         # save dataset
-        df_final.to_csv("data/df_final.csv")
+        df_final.to_parquet("data/df_final.gzip", compression='gzip')
