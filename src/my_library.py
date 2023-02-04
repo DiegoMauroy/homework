@@ -42,6 +42,21 @@ def dictionnary_to_dataframe(data, transpose=True):
 
     return df
 
+#### Transforms a dictionary column into several columns ####
+def dictonnary_to_multi_columns(df, col, replace):
+
+    for index, row in df.iterrows():
+
+        for ky, value in row[col].items():
+            
+            df.at[index, col + "_" + ky] = value
+    
+    if replace:
+
+        df = df.drop([col], axis = 1)
+    
+    return df
+
 #### Selects the rows of the dataframe where col == bool ####
 #### col is the name of a boolean column ####
 #### bool is a boolean ####
@@ -50,3 +65,8 @@ def select_in_boolean_column(df, col, bool):
     df_reduce = df[df[col] == bool]
 
     return df_reduce
+
+#### Get timestamp ####
+def timestamp():
+
+    return pd.Timestamp.now(tz = "UTC")
