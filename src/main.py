@@ -63,3 +63,30 @@ if __name__ == "__main__":
 
             # save dataset
             df_price.to_csv("data/df_price.csv")
+        
+        # check connection api
+        if status_price != 200 or status_currencies_code != 200:
+
+            print("Error API")
+
+        else:
+
+            # merge df_price and df_currency_code (inner join)
+            df_final = df_currency_code.merge(df_price, left_index = True, right_index = True)
+
+            # data quality (dtypes, number of nan in each column, duplicate rows removed)
+            print(df_final.dtypes)
+            nbr_nan = pd.DataFrame(index = df_final.columns)
+            for col in df_final.columns:
+
+                nbr_nan.at[col, "nbr_nan"] = df_final[col].isna().sum()
+
+            print(nbr_nan)
+            df_final.drop_duplicates(inplace=True)
+
+            # define a timestamp index
+            df_final["abréviation"] = df_final.index
+            df_final.set_index("timestamp", inplace = True)
+
+            # save dataset
+            df_final.to_csv("data/df_final.csv")
