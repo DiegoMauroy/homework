@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import schedule
 
 #### The function returns the data generated from an API call to url_base + query_url + status of request ####
 #### Data are in a dictonnary ####
@@ -70,3 +71,98 @@ def select_in_boolean_column(df, col, bool):
 def timestamp():
 
     return pd.Timestamp.now(tz = "UTC")
+
+#### Excute periodicaly the function fct ####
+#### args contains the params of fct ####
+#### w (week), h (hour), m (minute) are the period ####
+#### only the smallest non-zero time unit is considered ####
+def resample(fct, *args, w=0, h=0, m=0):
+
+    if m != 0:
+
+        schedule.every(m).minutes.do(fct, *args)
+    
+    elif h != 0:
+
+        schedule.every(h).hours.do(fct, *args)
+    
+    elif w != 0:
+
+        schedule.every(w).weeks.do(fct, *args)
+
+    fct(*args)
+    while True:
+
+        schedule.run_pending()
+
+#### Principal function to creat df_final ####
+def creation_df_final(url_base, url_query1, url_query2):
+
+    # call api and recover data "currencies"
+    status_currencies_code, data_currency_code = make_request(url_base, url_query1)
+
+    # check connection api
+    if status_currencies_code != 200:
+
+        print("Error API")
+    
+    else:
+
+        # organize data into a dataframe
+        df_currency_code = dictionnary_to_dataframe(data_currency_code["data"]["currencies"])
+
+        # Reduce the dataset to rows where "altcoing" == False
+        df_currency_code = select_in_boolean_column(df_currency_code, "altcoin", False)
+
+        # save dataset
+        df_currency_code.to_csv("data/df_currency_code.csv")
+    
+    # call api and recover data "ticker-all-currencies"
+    time_api_call = timestamp()
+    status_price, data_price = make_request(url_base, url_query2)
+
+    # check connection api
+    if status_price != 200:
+
+        print("Error API")
+    
+    else:
+
+        # organize data into a dataframe
+        df_price = dictionnary_to_dataframe(data_price)
+        df_price = dictonnary_to_multi_columns(df_price, "rates", True)
+
+        # add timestamp
+        df_price["timestamp"] = time_api_call
+
+        # save dataset
+        df_price.to_csv("data/df_price.csv")
+    
+    # check connection api
+    if status_price != 200 or status_currencies_code != 200:
+
+        print("Error API")
+
+    else:
+
+        # merge df_price and df_currency_code (inner join)
+        df_final = df_currency_code.merge(df_price, left_index = True, right_index = True)
+
+        # data quality (dtypes, number of nan in each column, duplicate rows removed)
+        """
+        print(df_final.dtypes)
+        nbr_nan = pd.DataFrame(index = df_final.columns)
+        for col in df_final.columns:
+
+            nbr_nan.at[col, "nbr_nan"] = df_final[col].isna().sum()
+
+        print(nbr_nan)
+        df_final.drop_duplicates(inplace=True)
+        """
+
+        # define a timestamp index
+        df_final["abréviation"] = df_final.index
+        df_final.set_index("timestamp", inplace = True)
+
+        # save dataset
+        df_final.to_csv("data/df_final.csv")
