@@ -1,0 +1,48 @@
+version: '3.9'
+services:
+  app_period:
+    build: .
+    container_name: coin_app_period
+    command: "python3 ./src/main.py --minutes=10 --sql=True --parquet=True"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - sqlite3
+    volumes:
+      - dbdata:/data/
+    networks:
+      - backend
+
+  app_once:
+    build: .
+    container_name: coin_app_once
+    command: "python3 ./src/main.py --minutes=30 --drive=True --once=True"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - sqlite3
+    volumes:
+      - dbdata:/data/
+    networks:
+      - backend
+
+  sqlite3:
+    image: nouchka/sqlite3:latest
+    container_name: coin_sqlite3
+    stdin_open: true
+    tty: true
+    volumes:
+      - dbdata:/data/
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  dbdata:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/dbdata/'

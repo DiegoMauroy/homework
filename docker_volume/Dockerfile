@@ -14,6 +14,4 @@ RUN pip3 install -r requirements.txt
 COPY ./src/ ./src/
 COPY ./data/ ./data/
 COPY config.ini .
-
-# command to run on container start
-CMD ["python3", "./src/main.py"]
+COPY client_secrets.json .

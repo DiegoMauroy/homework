@@ -214,5 +214,5 @@ def creation_df_final(params_url1, params_url2, save_parquet, save_sql, save_csv
             file_csv.Upload()
         
         if once == True:
-            print("ok")
+
             return schedule.CancelJob
