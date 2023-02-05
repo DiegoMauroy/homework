@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import schedule
+import sqlite3
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
@@ -94,11 +95,13 @@ def resample(fct, *args, w=0, h=0, m=0):
 
     fct(*args)
     while True:
-
+        
         schedule.run_pending()
 
+
+
 #### Get data api, put data in dataframe, organize dataframe and save dataframe ####
-def data_api_to_dataframe(url_base, url_query, filename, list_index_json = [], timestamp_bool = False, boolean_column_name = None, boolean_column_bool = False, column_dict_name = None, column_dict_replace = True):
+def data_api_to_dataframe(url_base, url_query, filename, list_index_json = [], timestamp_bool = False, boolean_column_name = None, boolean_column_bool = False, column_dict_name = None, column_dict_replace = True, save_parquet = True, save_sql = True, save_csv = True):
 
     # call the api and put the data in the dictionary
     if timestamp_bool == True:
@@ -136,16 +139,29 @@ def data_api_to_dataframe(url_base, url_query, filename, list_index_json = [], t
             df["timestamp"] = time_api_call
 
         # save dataset
-        df.to_parquet(filename + ".gzip", compression="gzip")
-    
+        if save_parquet == True:
+            
+            df.to_parquet(filename + ".gzip", compression="gzip")
+        
+        if save_csv == True:
+
+            df.to_csv(filename + ".csv")
+
+        if save_sql == True:
+
+            conn = sqlite3.connect(filename + ".db")
+            c = conn.cursor()
+            df.to_sql(name = filename.split("/")[-1], con = conn, if_exists='replace')
+            conn.close()
+        
     return df, status
 
 #### Merge two dataframe and save the result ####
-def creation_df_final(params_url1, params_url2, filename_df_final):
+def creation_df_final(params_url1, params_url2, save_parquet, save_sql, save_csv, filename_df_final, folder_drive_id, drive):
 
-    df1, status_1 = data_api_to_dataframe(params_url1["url_base"], params_url1["url_query"], params_url1["filename"], params_url1["list_index_json"], params_url1["timestamp_bool"], params_url1["boolean_column_name"], params_url1["boolean_column_bool"], params_url1["column_dict_name"], params_url1["column_dict_replace"])
+    df1, status_1 = data_api_to_dataframe(params_url1["url_base"], params_url1["url_query"], params_url1["filename"], params_url1["list_index_json"], params_url1["timestamp_bool"], params_url1["boolean_column_name"], params_url1["boolean_column_bool"], params_url1["column_dict_name"], params_url1["column_dict_replace"], params_url1["save_parquet"], params_url1["save_sql"], params_url1["save_csv"])
     
-    df2, status_2 = data_api_to_dataframe(params_url2["url_base"], params_url2["url_query"], params_url2["filename"], params_url2["list_index_json"], params_url2["timestamp_bool"], params_url2["boolean_column_name"], params_url2["boolean_column_bool"], params_url2["column_dict_name"], params_url2["column_dict_replace"])
+    df2, status_2 = data_api_to_dataframe(params_url2["url_base"], params_url2["url_query"], params_url2["filename"], params_url2["list_index_json"], params_url2["timestamp_bool"], params_url2["boolean_column_name"], params_url2["boolean_column_bool"], params_url2["column_dict_name"], params_url2["column_dict_replace"], params_url2["save_parquet"], params_url2["save_sql"], params_url2["save_csv"])
     
     # check connection api
     if status_2 != 200 or status_1 != 200:
@@ -174,4 +190,22 @@ def creation_df_final(params_url1, params_url2, filename_df_final):
         df_final.set_index("timestamp", inplace = True)
 
         # save dataset
-        df_final.to_parquet(filename_df_final + ".gzip", compression="gzip")
+        if save_parquet == True:
+            
+            df_final.to_parquet(filename_df_final + ".gzip", compression="gzip")
+
+        if save_csv == True:
+            
+            df_final.to_csv(filename_df_final + ".csv")
+
+        if save_sql == True:
+
+            conn = sqlite3.connect(filename_df_final + ".db")
+            c = conn.cursor()
+            df_final.to_sql(name = filename_df_final.split("/")[-1], con = conn, if_exists='replace')
+            conn.close()
+
+        # send csv to google drive
+        file_csv = drive.CreateFile({'parents': [{'id': folder_drive_id}]})
+        file_csv.SetContentFile(filename_df_final + ".csv")
+        file_csv.Upload()

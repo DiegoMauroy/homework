@@ -14,3 +14,6 @@ docker_no_volume/data/*.gzip
 docker_volume/data/*.csv
 docker_volume/data/*.db
 docker_volume/data/*.gzip
+
+# Ignore data api google drive
+docker_volume/client_secrets.json
