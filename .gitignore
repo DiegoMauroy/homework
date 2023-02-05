@@ -7,4 +7,4 @@ config.ini
 # Ignore data
 /data/*.csv
 /data/*.db
-/data/*.parquet
+/data/*.gzip
