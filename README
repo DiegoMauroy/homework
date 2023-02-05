@@ -1,0 +1,6 @@
+# Homework
+Solving the homework
+
+You will find a README in each sub-folder.
+The folder "docker_no_volume" corresponds to the resolution of the first exercice and "Build an application running on Docker able to call the API every 10 minutes." of the second exercice.
+The folder "docker_volume" corresponds to the resolution of "Execute your container as a Docker volume" of the second exercice.

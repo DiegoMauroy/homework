@@ -7,14 +7,14 @@ if __name__ == "__main__":
 
     # argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weeks', action="store", default=0, type=int)
-    parser.add_argument('--hours', action="store", default=0, type=int)
-    parser.add_argument('--minutes', action="store", default=0, type=int)
-    parser.add_argument('--sql', action="store", default=False, type=bool)
-    parser.add_argument('--parquet', action="store", default=False, type=bool)
-    parser.add_argument('--csv', action="store", default=False, type=bool)
-    parser.add_argument('--drive', action="store", default=False, type=bool)
-    parser.add_argument('--once', action="store", default=False, type=bool)
+    parser.add_argument('--weeks', action="store", default=0, type=int, help="data storage period in weeks (default : 0)")
+    parser.add_argument('--hours', action="store", default=0, type=int, help="data storage period in hours (default : 0)")
+    parser.add_argument('--minutes', action="store", default=0, type=int, help="data storage period in minutes (default : 0)")
+    parser.add_argument('--sql', action="store", default=False, type=bool, help="data stored in db format (default : False)")
+    parser.add_argument('--parquet', action="store", default=False, type=bool, help="data stored in parquet format (default : False)")
+    parser.add_argument('--csv', action="store", default=False, type=bool, help="data stored in csv format (default : False)")
+    parser.add_argument('--drive', action="store", default=False, type=bool, help="csv sent to your drive (default : False)")
+    parser.add_argument('--once', action="store", default=False, type=bool, help="retrieve data only once (default : False)")
     args = parser.parse_args()
 
     # Read config file

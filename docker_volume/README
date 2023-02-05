@@ -1,0 +1,41 @@
+This application allows you to store periodically or not the data of a PLC in different formats (parquet, db, csv).
+You can decide the period of data storage.
+
+To use this application:
+    - clone the repository
+    - cd PATH/docker_volume
+    - create a folder "data"
+    - activate your google drive API on https://console.cloud.google.com/apis/ and download the json file containing your client_id (see google documentation)
+    - put the json file in PATH/docker_volume and rename it "client_secrets.json"
+    - create a folder on your drive and get the id of this folder
+    - create a "config.ini" file with this structure (you can choose your user_name and password, id_folder_drive is the id of you drive folder):
+
+        [DEFAULT]
+        user_name = user
+        password = password
+        url_base = https://localbitcoins.com/
+
+        [DRIVE]
+        id_folder_drive = id_folder
+    
+    - to run the application : 
+        - create python environment : python3 -m venv .venv/homework
+        - in the python environment : python3 -m pip3 install -r requirements.txt
+        - in the python environment : python3 src/main.py (--help to define you excution params)
+                                    --> You will have to enter your username and password in the terminal
+    
+    Warning : I have created a volume in the docker-compose and linked it to the different services. A folder is indeed created on the local disk (named dbdata), but I don't understand how to copy the data from the docker to the local disk.
+    - To dockerize the application : 
+        - docker-compose build
+        - docker-compose create
+    
+    Three services are created by docker-compose: 
+        - one executes "python3 ./src/main.py --minutes=10 --sql=True --parquet=True" (df_final is stored locally in .parquet files and a SQL database of your preference (PosgrSQL, sqlite, etc ), the results of every api call are appended every 10 minutes to your database)
+            to run : docker-compose run app_period
+                - You will have to enter your username and password in the terminal
+        - an other executes "python3 ./src/main.py --minutes=30 --drive=True --once=True" (send a .csv file to your google drive after the container has been executed for 30 minutes)
+            to run : docker-compose run app_once
+                - you will have to enter your username and password in the terminal
+                - this option doesn't work because the google drive api can't validate the connection to the drive in docker and I haven't found the solution to this problem
+        - the last is the sqlite service
+    

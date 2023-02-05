@@ -1,0 +1,19 @@
+This application allows you to periodically store the data of an API in parquet formats.
+You can decide the period of data storage.
+
+To use this application:
+    - clone the repository
+    - cd PATH/docker_no_volume
+    - define the period in the last line of "src/main.py". w = week, h = hour, m = minute. Only the smallest non-zero period is taken into account.
+    - create a folder "data"
+    - create a "config.ini" file with this structure (you can choice your user_name and password):
+
+        [DEFAULT]
+        user_name = user
+        password = password
+        url_base = https://localbitcoins.com/
+    
+    - To dockerize the application : docker build --tag homework .
+    - To run the container : docker run -i -t homework
+        - You will have to enter your username and password in the terminal
+    
