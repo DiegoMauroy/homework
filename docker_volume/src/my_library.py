@@ -79,7 +79,7 @@ def timestamp():
 #### args contains the params of fct ####
 #### w (week), h (hour), m (minute) are the period ####
 #### only the smallest non-zero time unit is considered ####
-def resample(fct, *args, w=0, h=0, m=0):
+def resample(fct, w=0, h=0, m=0, *args):
 
     if m != 0:
 
@@ -93,12 +93,11 @@ def resample(fct, *args, w=0, h=0, m=0):
 
         schedule.every(w).weeks.do(fct, *args)
 
-    fct(*args)
     while True:
-        
+
         schedule.run_pending()
-
-
+        if not schedule.jobs:
+            break
 
 #### Get data api, put data in dataframe, organize dataframe and save dataframe ####
 def data_api_to_dataframe(url_base, url_query, filename, list_index_json = [], timestamp_bool = False, boolean_column_name = None, boolean_column_bool = False, column_dict_name = None, column_dict_replace = True, save_parquet = True, save_sql = True, save_csv = True):
@@ -114,6 +113,8 @@ def data_api_to_dataframe(url_base, url_query, filename, list_index_json = [], t
     if status != 200:
 
         print("Error API")
+
+        return None, status
     
     else:
 
@@ -154,10 +155,10 @@ def data_api_to_dataframe(url_base, url_query, filename, list_index_json = [], t
             df.to_sql(name = filename.split("/")[-1], con = conn, if_exists='replace')
             conn.close()
         
-    return df, status
+        return df, status
 
 #### Merge two dataframe and save the result ####
-def creation_df_final(params_url1, params_url2, save_parquet, save_sql, save_csv, filename_df_final, folder_drive_id, drive):
+def creation_df_final(params_url1, params_url2, save_parquet, save_sql, save_csv, save_drive, filename_df_final, folder_drive_id, drive, once):
 
     df1, status_1 = data_api_to_dataframe(params_url1["url_base"], params_url1["url_query"], params_url1["filename"], params_url1["list_index_json"], params_url1["timestamp_bool"], params_url1["boolean_column_name"], params_url1["boolean_column_bool"], params_url1["column_dict_name"], params_url1["column_dict_replace"], params_url1["save_parquet"], params_url1["save_sql"], params_url1["save_csv"])
     
@@ -194,7 +195,7 @@ def creation_df_final(params_url1, params_url2, save_parquet, save_sql, save_csv
             
             df_final.to_parquet(filename_df_final + ".gzip", compression="gzip")
 
-        if save_csv == True:
+        if save_csv == True or save_drive == True:
             
             df_final.to_csv(filename_df_final + ".csv")
 
@@ -206,6 +207,12 @@ def creation_df_final(params_url1, params_url2, save_parquet, save_sql, save_csv
             conn.close()
 
         # send csv to google drive
-        file_csv = drive.CreateFile({'parents': [{'id': folder_drive_id}]})
-        file_csv.SetContentFile(filename_df_final + ".csv")
-        file_csv.Upload()
+        if save_drive == True:
+
+            file_csv = drive.CreateFile({'parents': [{'id': folder_drive_id}]})
+            file_csv.SetContentFile(filename_df_final + ".csv")
+            file_csv.Upload()
+        
+        if once == True:
+            print("ok")
+            return schedule.CancelJob

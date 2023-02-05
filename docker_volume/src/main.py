@@ -1,8 +1,21 @@
 from my_library import *
 import configparser
+import argparse
 
 #### Main ####
 if __name__ == "__main__":
+
+    # argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--weeks', action="store", default=0, type=int)
+    parser.add_argument('--hours', action="store", default=0, type=int)
+    parser.add_argument('--minutes', action="store", default=0, type=int)
+    parser.add_argument('--sql', action="store", default=False, type=bool)
+    parser.add_argument('--parquet', action="store", default=False, type=bool)
+    parser.add_argument('--csv', action="store", default=False, type=bool)
+    parser.add_argument('--drive', action="store", default=False, type=bool)
+    parser.add_argument('--once', action="store", default=False, type=bool)
+    args = parser.parse_args()
 
     # Read config file
     config = configparser.ConfigParser()
@@ -37,9 +50,9 @@ if __name__ == "__main__":
                        "boolean_column_bool" : False, 
                        "column_dict_name" : None, 
                        "column_dict_replace" : True,
-                       "save_parquet" : True,
-                       "save_sql" : True,
-                       "save_csv" : True}
+                       "save_parquet" : args.parquet,
+                       "save_sql" : args.sql,
+                       "save_csv" : args.csv}
         params_url2 = {"url_base" : url_base, 
                        "url_query" : url, 
                        "filename" : "data/df_price", 
@@ -49,8 +62,8 @@ if __name__ == "__main__":
                        "boolean_column_bool" : False, 
                        "column_dict_name" : "rates", 
                        "column_dict_replace" : True,
-                       "save_parquet" : True,
-                       "save_sql" : True,
-                       "save_csv" : True}
+                       "save_parquet" : args.parquet,
+                       "save_sql" : args.sql,
+                       "save_csv" : args.csv}
         
-        resample(creation_df_final, params_url1, params_url2, True, True, True, "data/df_final", folder_drive_id, drive, w=0, h=0, m=10)
+        resample(creation_df_final, args.weeks, args.hours, args.minutes, params_url1, params_url2, args.parquet, args.sql, args.csv, args.drive, "data/df_final", folder_drive_id, drive, args.once)
