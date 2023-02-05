@@ -2,9 +2,15 @@
 /.venv
 
 # Ignore config  file
-config.ini
+docker_no_volume/config.ini
+docker_volume/config.ini
 
 # Ignore data
-/data/*.csv
-/data/*.db
-/data/*.gzip
+docker_no_volume/data/*.csv
+docker_no_volume/data/*.db
+docker_no_volume/data/*.gzip
+
+# Ignore data
+docker_volume/data/*.csv
+docker_volume/data/*.db
+docker_volume/data/*.gzip
